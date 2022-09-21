@@ -1,5 +1,7 @@
 // LINK: https://code.earthengine.google.com/?accept_repo=users/rebeccanavarrokhoury/MDPI_RS/SAISS_olive_intensification
+// or git clone https://earthengine.googlesource.com/users/rebeccanavarrokhoury/MDPI_RS 
 
+//Input variables: 
 var Aug2010 = ee.Image("users/rebeccanavarrokhoury/normalizedAug2010"),
     Jan2011 = ee.Image("users/rebeccanavarrokhoury/normalizedJan2011"),
     Aug2020 = ee.Image("users/rebeccanavarrokhoury/PSAug2020"),
