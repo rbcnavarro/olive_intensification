@@ -1,7 +1,5 @@
 // LINK: https://code.earthengine.google.com/?accept_repo=users/rebeccanavarrokhoury/MDPI_RS/SAISS_olive_intensification
 // or git clone https://earthengine.googlesource.com/users/rebeccanavarrokhoury/MDPI_RS 
-
-//Input variables: 
 var Aug2010 = ee.Image("users/rebeccanavarrokhoury/normalizedAug2010"),
     Jan2011 = ee.Image("users/rebeccanavarrokhoury/normalizedJan2011"),
     Aug2020 = ee.Image("users/rebeccanavarrokhoury/PSAug2020"),
@@ -50,8 +48,6 @@ Map.addLayer(aoi,{}, 'AOI')
 Map.addLayer(validation.filter(ee.Filter.eq('Croptype', 2)), {'color':"blue"}, 'Target class');
 
 // Reduced AOI area calculation
-
-var scaleforTestArea = 5;
  
 var img = ee.Image.pixelArea().divide(10000)
 
@@ -384,6 +380,7 @@ else if (data=="SIEVED") {
 
 // Pixel Area of reference data
     var pixelArea = ee.Image.pixelArea().mask(constantImg)
+    //var pixelAreainHa = pixelArea.divide(1e4)
     var area = pixelArea.reduceRegion({
       reducer: ee.Reducer.sum(),
       geometry: aoi /* insert appropriate region */,
@@ -391,36 +388,43 @@ else if (data=="SIEVED") {
       maxPixels: 132287045
     })
     var areainHa_ref = ee.Number(
-      area.get('area')).divide(1e4);
+      area.get('area')).divide(1e4).round()//.getInfo().toFixed(2);
 
 
 // Calculate area overlap per reference class and classification results
-
+// Create a constant image with value 1 and use it as a mask for both the classified data (sieved or raw)
+// and the reference data per class
     var constant = ee.Image(1).clip(aoi)
     var classified_img = constant.mask(datainput);
     var ref_img = constant.mask(refImg);
-    var Compare = classified_img.subtract(ref_img);
+    
+// subtract the DN of the reference data from the classified image ChangeDetection = DN_classified - DN_reference
+// This shows which and how many areas (pixels) of the results are within the different reference classes
 
-// Add 1 to multiply area, otherwise pixelArea function multiplies with 0
-    var constantCompare= Compare.select("constant").add(1)
+    var overlap = classified_img.subtract(ref_img);
+
+// The resulting overlap area will have DN value = 0, thus, we need to add 1 to multiply with pixelArea function 
+
+    var overlap_constant = overlap.select("constant").add(1)
 
 // Calculate pixel area of the overlap area
-    var compareArea = ee.Image.pixelArea().mask(constantCompare);
-    var area = compareArea.reduceRegion({
+    var overlap_area = ee.Image.pixelArea().mask(overlap_constant);
+    //var overlap_area = overlap_area.divide(1e4)
+    var area = overlap_area.reduceRegion({
       reducer: ee.Reducer.sum(),
       geometry: aoi /* insert appropriate region */,
       scale:5/* insert appropriate scale */,
       maxPixels: 132287045
         }) 
 // Convert to ha
-    var compareAreainHa = ee.Number(
-      area.get('area')).divide(1e4);
+    var overlap_areainHa = ee.Number(
+      area.get('area')).divide(1e4).round()//getInfo().toFixed(2);
   
+// Calculate the percentage of overlap of results with each reference class
 
-    var percentage = compareAreainHa.divide(areainHa_ref);
+    var percentage = overlap_areainHa.divide(areainHa_ref);
     var percentage = percentage.multiply(100)
     print(percentage, '% of area from reference data mapped in class ' + observedClass)
 }
-
 
 
