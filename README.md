@@ -7,3 +7,8 @@ Olive orchard intensification has transformed an originally drought resilient tr
 The code for the here developed approach can be found in the [GEE-code.js](GEE-code.js) file or accessed directly in Google Earth Engine via:
 * https://code.earthengine.google.com/?accept_repo=users/rebeccanavarrokhoury/MDPI_RS
 * git clone https://earthengine.googlesource.com/users/rebeccanavarrokhoury/MDPI_RS
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+## License
+
+[GNU GENERAL PUBLIC LICENSE v. 3.0](LICENSE)
