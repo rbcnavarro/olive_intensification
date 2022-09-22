@@ -4,6 +4,6 @@ Olive orchard intensification has transformed an originally drought resilient tr
 
 ### Keywords: super high-density olive plantations; land use land cover mapping; Google Earth Engine; unsupervised classification; hierarchical divisive clustering; remote sensing
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-The code for the here developed approach can be found in the "GEE-code.js" file or accessed directly in Google Earth Engine via:
+The code for the here developed approach can be found in the [GEE-code.js](GEE-code.js) file or accessed directly in Google Earth Engine via:
 * https://code.earthengine.google.com/?accept_repo=users/rebeccanavarrokhoury/MDPI_RS
 * git clone https://earthengine.googlesource.com/users/rebeccanavarrokhoury/MDPI_RS
