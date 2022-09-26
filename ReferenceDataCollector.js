@@ -13,7 +13,10 @@ Map.drawingTools().addLayer([], 'Summer crops');
 Map.drawingTools().addLayer([], 'Double cropping');
 Map.drawingTools().addLayer([], 'Shrubland'); 
 Map.drawingTools().addLayer([], 'Other vegetation');
+Map.drawingTools().addLayer([], 'Impervious ground');
 Map.drawingTools().addLayer([], 'Bare land');
+Map.drawingTools().addLayer([], 'Deciduous orchards');
+Map.drawingTools().addLayer([], 'Evergreen orchards');
 
 
 
@@ -26,7 +29,7 @@ var TITLE_STYLE = {
   padding: '6px',
   color: '#616161',
   stretch: 'horizontal',
-  //style: {position: 'top-left'},
+  
   backgroundColor: '#11ffee00',
 };
 
@@ -85,7 +88,7 @@ var exportDataButton = ui.Button('Generate download link');
 exportDataButton.onClick(exportData);
 
 
-// Function to mask clouds in Sentinel 2 imagery   
+// Function to mask clouds in Sentinel 2 SR imagery   
 function maskS2clouds(image) {
   var cloudProb = image.select('MSK_CLDPRB');
   var snowProb = image.select('MSK_SNWPRB');
@@ -268,6 +271,9 @@ var controlPanel = ui.Panel({
     dropdown,
     ui.Label('3) Click on a field and observe the NDVI time series plot.'),
     ui.Label('4) Select a drawing mode, choose or create a LULC class (see "Geometry Imports), and start drawing. Quit drawing mode to plot more NDVI time series.'),
+    ui.Panel({
+      widgets:[
+       
     ui.Button({
       label: symbol.rectangle + ' Rectangle',
       onClick: drawRectangle,
@@ -282,20 +288,24 @@ var controlPanel = ui.Panel({
       label: symbol.point + ' Point',
       onClick: drawPoint,
       style: {stretch: 'horizontal'}
+    })],
+    layout: ui.Panel.Layout.flow('horizontal', true) 
     }),
+    
      ui.Button({
       label:  ' Quit drawing mode',
       onClick: quitDrawing,
       style: {stretch: 'horizontal'}
     }),
     ui.Label('5) When finished, generate a download link.'),
-    urlGeom,
+   
     exportDataButton,
-    
-    ],
+     urlGeom,
+    //ui.Label('*Please verify the here displayed satellite imagery with dated Google Earth Pro Imagery for better accuracy.'),
+    ui.Label('Data source: Sentinel-2 SR Data (ESA/Copernicus).')],
     
   layout: ui.Panel.Layout.flow('vertical', true),
-  style: {width: '300px',
+  style: {width: '320px',
   //backgroundColor: colors.gray,
   position: 'bottom-left',
   shown: true
