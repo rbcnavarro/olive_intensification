@@ -8,7 +8,7 @@ The code for the here developed approach can be found in the [GEE-code.js](GEE-c
 * https://code.earthengine.google.com/?accept_repo=users/rebeccanavarrokhoury/MDPI_RS
 * git clone https://earthengine.googlesource.com/users/rebeccanavarrokhoury/MDPI_RS
 
-You will also find available the [code](referencedatacollector.js) for the [reference data collection tool](https://rebeccanavarrokhoury.users.earthengine.app/view/referencedatacollector) developed during this study. 
+You will also find available the [code](ReferenceDataCollector.js) for the [reference data collection tool](https://rebeccanavarrokhoury.users.earthengine.app/view/referencedatacollector) developed during this study. 
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 ## License
