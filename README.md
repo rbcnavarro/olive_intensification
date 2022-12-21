@@ -11,6 +11,3 @@ The code for the here developed approach can be found in the [GEE-code.js](GEE-c
 You will also find available the [code](ReferenceDataCollector.js) for the [reference data collection tool](https://rebeccanavarrokhoury.users.earthengine.app/view/referencedatacollector) developed during this study. 
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
-## License
-
-[GNU GENERAL PUBLIC LICENSE v. 3.0](LICENSE)
