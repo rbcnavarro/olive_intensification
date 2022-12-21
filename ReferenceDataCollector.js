@@ -22,6 +22,68 @@ Map.drawingTools().addLayer([], 'Evergreen orchards');
 
 Map.drawingTools().setDrawModes(['polygon', 'point', 'rectangle']);
 
+
+// 
+
+
+var aboutPanel = ui.Panel(
+  {style: {margin: '0px -8px 0px -8px'}});
+
+// Show/hide info panel button.
+var aboutButton = ui.Button(
+  {label: 'About ❯', style: {margin: '0px 4px 0px 0px'}});
+
+// Information text. 
+var descrLabel = ui.Label('This app allows to plot an NDVI time series for different years to collect virtual reference data for different crop types based on their NDVI peak. It uses 10 m pixel size Sentinel-2 imagery. Please consider that orchards with large tree-to-tree spacings or additional land use off season between trees can cause a bias in the NDVI time series.');
+
+
+var gridmetLabel = ui.Label('Tool developed and designed by R. Navarro on behalf of BICC within the BMBF funded project I-WALAMAR [grant number: 01LZ1807D].', null,
+  'https://www.bicc.de/about/staff/staffmember/member/786-navarro/');
+var descrHolder = ui.Panel([descrLabel, gridmetLabel]);
+
+var infoShow = false;
+function infoButtonHandler() {
+  if(infoShow) {
+    infoShow = false;
+    descrHolder.style().set('shown', false);
+    aboutButton.setLabel('About ❯');
+  } else {
+    infoShow = true;
+    descrHolder.style().set('shown', true);
+    aboutButton.setLabel('About ❮');
+  }
+}
+aboutPanel.style().set({
+  position: 'top-right',
+  backgroundColor: 'rgba(255, 255, 255, 0.5)'
+});
+descrLabel.style().set({
+  margin: '0px',
+  backgroundColor: 'rgba(255, 255, 255, 0)',
+  fontSize: '13px',
+  color: '505050'
+});
+gridmetLabel.style().set({
+  margin: '4px 0px 0px 0px',
+  backgroundColor: 'rgba(255, 255, 255, 0)',
+  fontSize: '13px',
+  color: '505050'
+});
+descrHolder.style().set({
+  shown: false,
+  width: '250px',
+  margin: '4px 0px 0px 0px',
+  padding: '8px 8px 8px 8px',
+  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+});
+aboutButton.style().set({
+  margin: '0px 0px 0px 0px'
+});
+aboutButton.onClick(infoButtonHandler);
+aboutPanel.add(aboutButton);
+aboutPanel.add(descrHolder);
+Map.add(aboutPanel)
+
 // Set up styles
 var TITLE_STYLE = {
   fontWeight: '100',
@@ -59,6 +121,13 @@ function drawPoint() {
   drawingTools.draw();
 }
 
+function clearGeometry() {
+  var layers = drawingTools.layers();
+  layers.get(0).geometries().remove(layers.get(0).geometries().get(0));
+}
+function editMode() {
+  drawingTools.onEdit()
+}
 function quitDrawing() {
   
   drawingTools.stop();
@@ -89,7 +158,7 @@ exportDataButton.onClick(exportData);
 
 
 // Function to mask clouds in Sentinel 2 SR imagery   
-function maskS2clouds(image) {
+/*function maskS2clouds(image) {
   var cloudProb = image.select('MSK_CLDPRB');
   var snowProb = image.select('MSK_SNWPRB');
   var cloud = cloudProb.lt(10);
@@ -100,12 +169,24 @@ function maskS2clouds(image) {
   var mask = cloud.and(cirrus.neq(1)).and(shadow.neq(1));
   return image.updateMask(mask).divide(10000)
   .copyProperties(image, ['system:time_start']);
-}  
+}  */
 
 
 
-  
+  function maskS2clouds(image) {
+  var qa = image.select('QA60');
 
+  // Bits 10 and 11 are clouds and cirrus, respectively.
+  var cloudBitMask = 1 << 10;
+  var cirrusBitMask = 1 << 11;
+
+  // Both flags should be set to zero, indicating clear conditions.
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
+      .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
+
+  return image.updateMask(mask).divide(10000)
+  .copyProperties(image, ['system:time_start']);
+}
 // NDVI time series with harmonic fit and seasonal composite based on: 
 
 // Google Developers. Landsat8 Harmonic Modeling - Earth Engine Code Editor, 2021. 
@@ -172,8 +253,11 @@ var addHarmonics = function(freqs) {
 
 // User interface options -------------------------------------- 
 var years = {
- 
-  2019: '2019',
+
+2016: '2016',
+2017: '2017' ,
+2018: '2019',
+2019: '2019',
   2020: '2020',
   2021:'2021',
 }
@@ -188,7 +272,7 @@ var dropdown = ui.Select({
     var date_end = date_start.advance(1, 'years')
     var dateRange = ee.DateRange(date_start, date_end)
   
-    var harmonicSentinel = ee.ImageCollection('COPERNICUS/S2_SR')
+    var harmonicSentinel = ee.ImageCollection('COPERNICUS/S2_HARMONIZED')
         .filterDate(dateRange)
         .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',5))
         .map(maskS2clouds)
@@ -235,6 +319,7 @@ var dropdown = ui.Select({
     
     
     Map.clear();
+    Map.add(aboutPanel)
     Map.setOptions('HYBRID')
     Map.add(panelchart1);
 
@@ -291,18 +376,28 @@ var controlPanel = ui.Panel({
     })],
     layout: ui.Panel.Layout.flow('horizontal', true) 
     }),
-    
+    ui.Panel({
+      widgets:[
+       
      ui.Button({
-      label:  ' Quit drawing mode',
+      label:  ' ✎ Edit mode',
       onClick: quitDrawing,
       style: {stretch: 'horizontal'}
+    }),
+    ui.Button({
+      label:  ' 🗑 Delete geometry',
+      onClick: clearGeometry,
+      style: {stretch: 'horizontal'}
+    })],
+      layout: ui.Panel.Layout.flow('horizontal', true) 
     }),
     ui.Label('5) When finished, generate a download link.'),
    
     exportDataButton,
      urlGeom,
     //ui.Label('*Please verify the here displayed satellite imagery with dated Google Earth Pro Imagery for better accuracy.'),
-    ui.Label('Data source: Sentinel-2 SR Data (ESA/Copernicus).')],
+    ui.Label('Data source: Sentinel-2 Data (ESA/Copernicus).')],
+    
     
   layout: ui.Panel.Layout.flow('vertical', true),
   style: {width: '320px',
