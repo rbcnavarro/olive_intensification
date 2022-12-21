@@ -22,19 +22,6 @@ var data = 'SIEVED'
 
 print('-CLUSTER AND MASKING SEQUENCE USING ' + index + ' AND ' + data + ' DATA-')
 
-// Assign cluster number using the "INSPECTOR" by clicking on known areas
-// of evergreen vegetation, re-run, and re-assign until matched:
-
-//------------------------------------------------------------
-var DrySeasonCluster = 0
-var RainySeasonCluster = 0
-var NIR_Recluster = 1
-
-
-var DrySeasonCluster2010 = 0
-var RainySeasonCluster2010 = 0
-var NIR_Recluster2010 = 1
-//-------------------------------------------------------------
 
 // AOI Definition and Map Options
 
@@ -45,7 +32,7 @@ Map.addLayer(aoi,{}, 'AOI')
 
 // Target class from reference data
 
-Map.addLayer(validation.filter(ee.Filter.eq('Croptype', 2)), {'color':"blue"}, 'Target class');
+Map.addLayer(validation.filter(ee.Filter.eq('Croptype', 2)), {'color':"blue"}, 'Target class', false);
 
 // Reduced AOI area calculation
  
@@ -145,6 +132,19 @@ Map.addLayer(unClass, clusterVis, 'Dry Season Clustering 2020',false);
 
 // Select Cluster and create Summer Vegetation Mask
 
+
+var cluster1 = unClass.select('cluster').eq(1).selfMask();
+var cluster0 = unClass.select('cluster').eq(0)//.selfMask();
+var cluster0 = cluster0.add(1).selfMask() 
+var img1 = input.mask(cluster1).select(index)
+var img0 = input.mask(cluster0).select(index)
+
+if(img1.gt(img0)){
+  var DrySeasonCluster =0 }
+else if (img0.gt(img1)){
+  var DrySeasonCluster = 1 }
+
+
 var summerVeg = unClass.select('cluster').eq(DrySeasonCluster).selfMask();
 
 // Extract Evergreen Vegetation
@@ -164,13 +164,26 @@ var unClass = input.cluster(clusterer);
 
 Map.addLayer(unClass, clusterVis, 'Rainy Season Clustering 2020', false);
 
+
+var cluster1 = unClass.select('cluster').eq(1).selfMask();
+
+var cluster0 = unClass.select('cluster').eq(0)//.selfMask();
+var cluster0 = cluster0.add(1).selfMask() 
+var img1 = input.mask(cluster1).select(index)
+var img0 = input.mask(cluster0).select(index)
+
+if(img1.gt(img0)){
+  var RainySeasonCluster = 0 }
+else if (img0.gt(img1)){
+  var RainySeasonCluster =1 }
+  
 var winterVeg = unClass.select('cluster').eq(RainySeasonCluster).selfMask();
 
 // Select Dry season image NIR band to enhance separability between deciduous tree crops with 
 // winter soil greening or double cropping annuals
 
 var NIR = Aug2020.select('b4').mask(winterVeg);
-
+var input = NIR;
 // Create another training sample from the new input
 var training = NIR.sample({
   region: aoi,
@@ -185,6 +198,21 @@ var unClass = NIR.cluster(clusterer);
 // Visualize the clusters 
 
 Map.addLayer(unClass, clusterVis, 'NIR 2020 Recluster Test', false);
+
+
+
+var cluster1 = unClass.select('cluster').eq(1).selfMask();
+var cluster0 = unClass.select('cluster').eq(0)//.selfMask();
+var cluster0 = cluster0.add(1).selfMask() 
+
+var img1 = input.mask(cluster1)//.select('B8')
+var img0 = input.mask(cluster0)//.select('B8')
+
+if(img1.gt(img0)){
+  var NIR_Recluster = 1 }
+else if (img0.gt(img1)){
+  var NIR_Recluster = 0 }
+  
 var evergreens2020 = unClass.select('cluster').eq(NIR_Recluster).selfMask();
 
 
@@ -216,7 +244,21 @@ Map.addLayer(unClass, clusterVis, 'Dry Season Clustering 2010',false);
 
 // Select Cluster and create Summer Vegetation Mask
 
-var summerVeg = unClass.select('cluster').eq(DrySeasonCluster2010).selfMask();
+
+
+var cluster1 = unClass.select('cluster').eq(1).selfMask();
+var cluster0 = unClass.select('cluster').eq(0)//.selfMask();
+var cluster0 = cluster0.add(1).selfMask() 
+ 
+var img1 = input.mask(cluster1).select(index)
+var img0 = input.mask(cluster0).select(index)
+
+if(img1.gt(img0)){
+  var DrySeasonCluster = 0 }
+else if (img0.gt(img1)){
+  var DrySeasonCluster = 1 }
+
+var summerVeg = unClass.select('cluster').eq(DrySeasonCluster).selfMask();
 
 
 // Extract Evergreen Vegetation
@@ -231,7 +273,22 @@ var training = input.sample({
 var clusterer = ee.Clusterer.wekaKMeans(2).train(training);
 var unClass = input.cluster(clusterer);
 Map.addLayer(unClass, clusterVis, 'Rainy Season Clustering 2010', false);
-var winterVeg2010 = unClass.select('cluster').eq(RainySeasonCluster2010).selfMask();
+
+
+
+var cluster1 = unClass.select('cluster').eq(1).selfMask();
+var cluster0 = unClass.select('cluster').eq(0)//.selfMask();
+var cluster0 = cluster0.add(1).selfMask() 
+var img1 = input.mask(cluster1).select(index)
+var img0 = input.mask(cluster0).select(index)
+
+if(img1.gt(img0)){
+  var RainySeasonCluster = 0}
+else if (img0.gt(img1)){
+  var RainySeasonCluster = 1 }
+
+
+var winterVeg2010 = unClass.select('cluster').eq(RainySeasonCluster).selfMask();
 
 // Select Dry season image NIR band to enhance separability between deciduous tree crops with 
 // winter soil greening or double cropping annuals
@@ -251,7 +308,22 @@ var unClass = NIR.cluster(clusterer);
 // Visualize the clusters 
 
 Map.addLayer(unClass, clusterVis, 'NIR 2010 Recluster Test', false);
-var evergreens2010 = unClass.select('cluster').eq(NIR_Recluster2010).selfMask();
+
+
+
+
+var cluster1 = unClass.select('cluster').eq(1).selfMask();
+var cluster0 = unClass.select('cluster').eq(0)//.selfMask();
+var cluster0 = cluster0.add(1).selfMask() 
+ 
+var img1 = input.mask(cluster1)//.select('B8')
+var img0 = input.mask(cluster0)//.select('B8')
+
+if(img1.gt(img0)){
+  var NIR_Recluster = 1 }
+else if (img0.gt(img1)){
+  var NIR_Recluster = 0 }
+var evergreens2010 = unClass.select('cluster').eq(NIR_Recluster).selfMask();
 
 
 // Visualization and area calculation options
@@ -425,6 +497,7 @@ else if (data=="SIEVED") {
     var percentage = overlap_areainHa.divide(areainHa_ref);
     var percentage = percentage.multiply(100)
     print(percentage, '% of area from reference data mapped in class ' + observedClass)
+    Map.addLayer(overlap, {palette: '#e616ff'}, 'Overlap area of class '+ observedClass, false)
 }
 
 
